@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WasedaTime Pro</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+body{
+background:#f7f7f7;
+color:#222;
+padding:20px;
+max-width:560px;
+margin:auto;
+}
+
+header{
+text-align:center;
+margin-bottom:20px;
+}
+
+h1{
+font-size:30px;
+font-weight:700;
+}
+
+.sub{
+font-size:14px;
+color:#888;
+margin-top:6px;
+}
+
+.card{
+background:#fff;
+border-radius:20px;
+padding:18px;
+margin-bottom:18px;
+box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+
+.time{
+font-size:34px;
+font-weight:700;
+text-align:center;
+}
+
+.status{
+margin-top:10px;
+text-align:center;
+font-size:18px;
+font-weight:600;
+}
+
+.green{color:#1a9c45;}
+.red{color:#d63384;}
+.gray{color:#888;}
+
+.section-title{
+font-size:18px;
+font-weight:700;
+margin-bottom:14px;
+}
+
+.course{
+padding:12px;
+border-radius:14px;
+background:#f3f3f3;
+margin-bottom:10px;
+cursor:pointer;
+transition:.2s;
+}
+
+.course:hover{
+transform:scale(1.02);
+}
+
+.course small{
+display:block;
+margin-top:5px;
+color:#666;
+}
+
+.lang{
+position:fixed;
+top:16px;
+right:16px;
+background:#fff;
+padding:8px 12px;
+border-radius:12px;
+font-size:14px;
+cursor:pointer;
+box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.timetable{
+width:100%;
+border-collapse:separate;
+border-spacing:6px;
+font-size:12px;
+text-align:center;
+}
+
+.timetable th{
+padding:8px;
+color:#666;
+font-weight:700;
+}
+
+.timetable td{
+padding:10px 6px;
+border-radius:14px;
+background:#f8f8f8;
+cursor:pointer;
+vertical-align:middle;
+transition:.2s;
+}
+
+.timetable td:hover{
+transform:scale(1.02);
+}
+
+.timecell{
+background:#fff !important;
+font-weight:700;
+color:#888;
+line-height:1.5;
+min-width:68px;
+}
+
+.pink{background:#ffe3ec !important;}
+.blue{background:#dff1ff !important;}
+.greenbg{background:#e4f8e6 !important;}
+.yellow{background:#fff7d6 !important;}
+.purple{background:#ece3ff !important;}
+
+.tip{
+font-size:12px;
+color:#999;
+margin-top:10px;
+text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="lang" onclick="toggleLang()">中文 / EN</div>
+
+<header>
+<h1>WasedaTime Pro</h1>
+<div class="sub">Personal Smart Timetable</div>
+</header>
+
+<!-- 时间 -->
+<div class="card">
+<div class="time" id="clock">--:--:--</div>
+<div class="status" id="status">加载中...</div>
+<div class="tip">Tokyo Local Time</div>
+</div>
+
+<!-- 今日课程 -->
+<div class="card">
+<div class="section-title" id="todayTitle">今日课程</div>
+<div id="todayCourses"></div>
+</div>
+
+<!-- 学期课表 -->
+<div class="card">
+<div class="section-title" id="semesterTitle">Spring Semester</div>
+
+<table class="timetable">
+<thead>
+<tr>
+<th>Time</th>
+<th>Mon</th>
+<th>Tue</th>
+<th>Wed</th>
+<th>Thu</th>
+<th>Fri</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td class="timecell">08:50<br>10:30</td>
+<td></td>
+<td></td>
+<td class="purple" onclick="showCourse('Regression Analysis')">Regression</td>
+<td class="pink" onclick="showCourse('Comprehensive Japanese 2')">Japanese</td>
+<td></td>
+</tr>
+
+<tr>
+<td class="timecell">10:40<br>12:20</td>
+<td></td>
+<td class="pink" onclick="showCourse('Comprehensive Japanese 2')">Japanese</td>
+<td class="blue" onclick="showCourse('International Human Resource Management')">HRM</td>
+<td class="pink" onclick="showCourse('Comprehensive Japanese 2')">Japanese</td>
+<td></td>
+</tr>
+
+<tr>
+<td class="timecell">13:10<br>14:50</td>
+<td class="greenbg" onclick="showCourse('Introduction to Manga and Anime Culture')">Manga</td>
+<td class="yellow" onclick="showCourse('Freshman Seminar')">Seminar</td>
+<td class="blue" onclick="showCourse('International Human Resource Management')">HRM</td>
+<td class="yellow" onclick="showCourse('Introduction to International Relations 01')">IR</td>
+<td></td>
+</tr>
+
+<tr>
+<td class="timecell">15:05<br>16:45</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td class="blue" onclick="showCourse('Karate 02')">Karate</td>
+</tr>
+
+</tbody>
+</table>
+
+<div class="tip">点击课程名称查看官方 syllabus</div>
+</div>
+
+<script>
+
+let lang="cn";
+
+/* syllabus 链接 */
+const syllabusLinks={
+
+"Introduction to Manga and Anime Culture":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=18G000002801202618G000002818&pLng=en",
+
+"Comprehensive Japanese 2":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=9200122999982026920012299992&pLng=en",
+
+"Freshman Seminar":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=18G000015302202618G000015318&pLng=en",
+
+"Regression Analysis":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=18G000020201202618G000020218&pLng=en",
+
+"International Human Resource Management":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=18G000016601202618G000016618&pLng=en",
+
+"Introduction to International Relations 01":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=210IR20100012026210IR2010021&pLng=en",
+
+"Karate 02":
+"https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=9S070400070220269S070400079S&pLng=en"
+};
+
+
+/* 今日课程 */
+const schedule={
+1:[
+{name:"Introduction to Manga and Anime Culture",start:"13:10",end:"14:50"}
+],
+
+2:[
+{name:"Comprehensive Japanese 2",start:"10:40",end:"12:20"},
+{name:"Freshman Seminar",start:"13:10",end:"14:50"}
+],
+
+3:[
+{name:"Regression Analysis",start:"08:50",end:"10:30"},
+{name:"International Human Resource Management",start:"10:40",end:"12:20"},
+{name:"International Human Resource Management",start:"13:10",end:"14:50"}
+],
+
+4:[
+{name:"Comprehensive Japanese 2",start:"08:50",end:"10:30"},
+{name:"Comprehensive Japanese 2",start:"10:40",end:"12:20"},
+{name:"Introduction to International Relations 01",start:"13:10",end:"14:50"}
+],
+
+5:[
+{name:"Karate 02",start:"15:05",end:"16:45"}
+]
+};
+
+
+/* 东京时间 */
+function updateClock(){
+
+const now=new Date();
+
+const tokyo=new Date(
+now.toLocaleString("en-US",{timeZone:"Asia/Tokyo"})
+);
+
+const h=String(tokyo.getHours()).padStart(2,'0');
+const m=String(tokyo.getMinutes()).padStart(2,'0');
+const s=String(tokyo.getSeconds()).padStart(2,'0');
+
+document.getElementById("clock").innerText=`${h}:${m}:${s}`;
+
+updateStatus(tokyo);
+renderToday(tokyo.getDay());
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+
+/* 当前是否上课 */
+function updateStatus(now){
+
+let day=now.getDay();
+let current=(day===0?7:day);
+
+let list=schedule[current] || [];
+let time=now.getHours()*60+now.getMinutes();
+
+let text="当前无课";
+let cls="gray";
+
+for(let c of list){
+
+let [sh,sm]=c.start.split(":").map(Number);
+let [eh,em]=c.end.split(":").map(Number);
+
+let start=sh*60+sm;
+let end=eh*60+em;
+
+if(time>=start && time<=end){
+text="正在上课："+c.name;
+cls="green";
+break;
+}
+else if(time<start){
+text="下一节："+c.name+" "+c.start;
+cls="red";
+break;
+}
+
+}
+
+document.getElementById("status").className="status "+cls;
+document.getElementById("status").innerText=text;
+}
+
+
+/* 今日课程 */
+function renderToday(day){
+
+let current=(day===0?7:day);
+let list=schedule[current] || [];
+
+let html="";
+
+if(list.length===0){
+
+html='<div class="course">今天没课 😎</div>';
+
+}else{
+
+list.forEach(c=>{
+
+html+=`
+<div class="course" onclick="showCourse('${c.name}')">
+${c.name}
+<small>${c.start} - ${c.end}</small>
+</div>
+`;
+
+});
+
+}
+
+document.getElementById("todayCourses").innerHTML=html;
+}
+
+
+/* 点击课程打开 syllabus */
+function showCourse(name){
+
+if(syllabusLinks[name]){
+window.open(syllabusLinks[name],"_blank");
+}else{
+alert("No syllabus found.");
+}
+
+}
+
+
+/* 中英切换 */
+function toggleLang(){
+
+if(lang==="cn"){
+document.getElementById("todayTitle").innerText="Today's Classes";
+document.getElementById("semesterTitle").innerText="Spring Semester";
+lang="en";
+}else{
+document.getElementById("todayTitle").innerText="今日课程";
+document.getElementById("semesterTitle").innerText="春学期";
+lang="cn";
+}
+
+}
+
+</script>
+
+</body>
+</html>
